@@ -4,13 +4,10 @@ import { Brain, RotateCcw, Check, Sparkles, X, FileText, HelpCircle, Trophy } fr
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { studyApi } from '../../lib/api/study';
 import type { FlashcardDeck, Flashcard } from '../../lib/api/study';
-import { useGamificationStore } from '../../lib/stores/gamificationStore';
 import './FlashcardsPage.css';
 
 export function FlashcardsPage() {
   const qc = useQueryClient();
-  const awardXp = useGamificationStore(state => state.awardXp);
-  const updateStreak = useGamificationStore(state => state.updateStreak);
 
   // States
   const [activeDeckId, setActiveDeckId] = useState<string | null>(null);
@@ -111,10 +108,6 @@ export function FlashcardsPage() {
   const handleRateCard = (rating: number) => {
     const activeCard = activeCards[currentCardIdx];
     reviewMutation.mutate({ cardId: activeCard.id, rating });
-
-    // Award XP
-    awardXp(15, `Reviewed Flashcard`);
-    updateStreak();
 
     // Advance
     if (currentCardIdx < activeCards.length - 1) {
@@ -333,11 +326,8 @@ export function FlashcardsPage() {
               style={{ width: '100%', textAlign: 'center', padding: '30px' }}
             >
               <Trophy size={60} color="var(--primary)" className="animate-float" style={{ marginBottom: '16px' }} />
-              <h2>Deck Completed! 🃏</h2>
+              <h2>Deck Completed!</h2>
               <p className="text-muted">Excellent job! Spaced repetition variables have been updated dynamically via the SM-2 scheduler.</p>
-              <div className="quiz-xp-reward badge badge-xp animate-pulse" style={{ margin: '16px 0' }}>
-                +{activeCards.length * 15} XP Earned
-              </div>
               <button className="btn btn-primary btn-lg" style={{ width: '100%' }} onClick={() => setActiveDeckId(null)}>
                 Return to Decks
               </button>

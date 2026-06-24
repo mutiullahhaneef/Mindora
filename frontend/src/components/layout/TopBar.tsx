@@ -1,11 +1,9 @@
-import { Search, Bell, Sun, Moon, Menu, Zap, Check, MailOpen } from 'lucide-react';
+import { Search, Bell, Sun, Moon, Menu, Check, MailOpen } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useThemeStore } from '../../lib/stores/themeStore';
-import { useGamificationStore, xpProgress, xpForNextLevel } from '../../lib/stores/gamificationStore';
 import { authApi } from '../../lib/api/auth';
-import { gamificationApi } from '../../lib/api/gamification';
 import './TopBar.css';
 
 interface TopBarProps {
@@ -14,9 +12,6 @@ interface TopBarProps {
 
 export function TopBar({ onMenuToggle }: TopBarProps) {
   const { theme, toggleTheme } = useThemeStore();
-  const { totalXp, level } = useGamificationStore();
-  const progress = xpProgress(totalXp, level);
-  const nextLevelXp = xpForNextLevel(level);
 
   // States
   const [showNotifPanel, setShowNotifPanel] = useState(false);
@@ -28,23 +23,6 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
     queryFn: authApi.getMe,
     retry: 1,
   });
-
-  // Fetch notifications
-  const { data: notifications = [], refetch: refetchNotifs } = useQuery({
-    queryKey: ['notifications'],
-    queryFn: gamificationApi.getNotifications,
-    refetchInterval: 5000, // Poll every 5s
-    retry: 1,
-  });
-
-  const markReadMutation = useMutation({
-    mutationFn: gamificationApi.markNotificationRead,
-    onSuccess: () => {
-      refetchNotifs();
-    },
-  });
-
-  const unreadCount = notifications.filter(n => !n.is_read).length;
 
   useEffect(() => {
     function clickOutside(e: MouseEvent) {
@@ -76,22 +54,6 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
       </div>
 
       <div className="topbar-right">
-        {/* XP Display */}
-        <div className="topbar-xp" data-tooltip={`${totalXp} / ${nextLevelXp} XP to Level ${level + 1}`}>
-          <Zap size={16} className="xp-icon" />
-          <div className="xp-info">
-            <span className="xp-level">Lv. {level}</span>
-            <div className="xp-bar-mini">
-              <motion.div
-                className="xp-bar-mini-fill"
-                initial={{ width: 0 }}
-                animate={{ width: `${progress}%` }}
-                transition={{ duration: 0.6, ease: 'easeOut' }}
-              />
-            </div>
-          </div>
-        </div>
-
         {/* Notifications */}
         <button 
           className="btn-icon topbar-btn" 
@@ -100,7 +62,6 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
           style={{ position: 'relative' }}
         >
           <Bell size={20} />
-          {unreadCount > 0 && <span className="notification-dot" />}
         </button>
 
         {/* Theme Toggle */}
@@ -156,54 +117,15 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
               <span className="font-bold text-sm" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 'bold' }}>
-                <Bell size={16} className="text-primary" /> Notifications {unreadCount > 0 && <span className="badge" style={{ padding: '2px 6px', fontSize: '10px' }}>{unreadCount}</span>}
+                <Bell size={16} className="text-primary" /> Notifications
               </span>
-              {unreadCount > 0 && (
-                <button 
-                  onClick={() => {
-                    notifications.filter(n => !n.is_read).forEach(n => markReadMutation.mutate(n.id));
-                  }}
-                  style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '11px', color: 'var(--primary)', fontWeight: 'bold' }}
-                >
-                  Mark all read
-                </button>
-              )}
             </div>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {notifications.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '24px', color: 'var(--text-muted)', fontSize: '13px' }}>
-                  <MailOpen size={24} style={{ opacity: 0.3, marginBottom: '8px', marginLeft: 'auto', marginRight: 'auto' }} />
-                  <p style={{ margin: 0 }}>All caught up! No alerts.</p>
-                </div>
-              ) : (
-                notifications.map(notif => (
-                  <div 
-                    key={notif.id} 
-                    style={{
-                      padding: '10px 12px', borderRadius: '10px',
-                      background: notif.is_read ? 'rgba(255,255,255,0.02)' : 'rgba(88,204,2,0.06)',
-                      border: notif.is_read ? '1px solid transparent' : '1px solid rgba(88,204,2,0.15)',
-                      position: 'relative', display: 'flex', flexDirection: 'column', gap: '4px'
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <span style={{ fontSize: '13px', fontWeight: 'bold', display: 'inline-block', color: 'var(--text-color)' }}>{notif.title}</span>
-                      {!notif.is_read && (
-                        <button 
-                          className="btn-icon" 
-                          style={{ width: '18px', height: '18px', padding: 0 }}
-                          onClick={() => markReadMutation.mutate(notif.id)}
-                          title="Mark as read"
-                        >
-                          <Check size={12} className="text-primary" />
-                        </button>
-                      )}
-                    </div>
-                    <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-muted)', lineHeight: '1.3', textAlign: 'left' }}>{notif.message}</p>
-                  </div>
-                ))
-              )}
+              <div style={{ textAlign: 'center', padding: '24px', color: 'var(--text-muted)', fontSize: '13px' }}>
+                <MailOpen size={24} style={{ opacity: 0.3, marginBottom: '8px', marginLeft: 'auto', marginRight: 'auto' }} />
+                <p style={{ margin: 0 }}>All caught up! No notifications.</p>
+              </div>
             </div>
           </motion.div>
         )}

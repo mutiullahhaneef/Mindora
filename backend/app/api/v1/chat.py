@@ -72,11 +72,13 @@ async def chat(
 async def chat_ws(
     websocket: WebSocket,
     token: str = Query(...),
-    db: DbSession = Depends(get_db),
 ):
     """
     WebSocket endpoint for real-time study chat streaming.
     """
+    # Manually create DB session for WebSocket (can't use Annotated Depends here)
+    async for db in get_db():
+        break
     await websocket.accept()
     
     # Authenticate user from token query parameter

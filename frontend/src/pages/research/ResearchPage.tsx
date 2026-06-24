@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   FlaskConical,
@@ -10,7 +9,6 @@ import {
   Quote,
   PenTool,
   Wand2,
-  ArrowRight,
   CheckCircle2,
   X,
   Loader2,
@@ -41,7 +39,6 @@ const searchSources = [
 ];
 
 export function ResearchPage() {
-  const navigate = useNavigate();
   const qc = useQueryClient();
 
   // Dialog / Modal States
@@ -77,12 +74,10 @@ export function ResearchPage() {
   // Create Paper Mutation
   const createPaperMutation = useMutation({
     mutationFn: () => researchApi.createPaper(newPaperTitle, newPaperFormat),
-    onSuccess: (newPaper) => {
+    onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['papers'] });
       setShowNewPaperModal(false);
       setNewPaperTitle('');
-      // Redirect straight to the editor workspace
-      navigate(`/papers?id=${newPaper.id}`);
     },
   });
 
@@ -169,7 +164,6 @@ export function ResearchPage() {
                 key={paper.id} 
                 className="paper-card card glass" 
                 whileHover={{ y: -2 }}
-                onClick={() => navigate(`/papers?id=${paper.id}`)}
               >
                 <div className="paper-info">
                   <FlaskConical size={20} className="paper-icon" />
@@ -184,8 +178,9 @@ export function ResearchPage() {
                   </div>
                 </div>
                 <div className="paper-progress">
-                  <span className="text-xs text-muted" style={{ marginRight: '8px' }}>Open Editor</span>
-                  <ArrowRight size={18} className="paper-arrow" />
+                  <span className={`paper-status-text ${paper.status}`} style={{ fontSize: '12px' }}>
+                    {paper.status.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                  </span>
                 </div>
               </motion.div>
             ))}

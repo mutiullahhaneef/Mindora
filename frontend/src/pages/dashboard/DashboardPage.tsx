@@ -4,10 +4,7 @@ import {
   Brain,
   FlaskConical,
   GraduationCap,
-  Flame,
   Target,
-  Trophy,
-  Zap,
   TrendingUp,
   Clock,
   FileText,
@@ -15,7 +12,9 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { gamificationApi } from '../../lib/api/gamification';
+import { useNavigate } from 'react-router-dom';
+import { studyApi } from '../../lib/api/study';
+import { authApi } from '../../lib/api/auth';
 import './DashboardPage.css';
 
 const container = {
@@ -66,38 +65,49 @@ const quickActions = [
   },
 ];
 
-const recentActivities = [
-  { icon: FileText, label: 'Uploaded "Machine Learning Basics.pdf"', time: '2 hours ago', xp: 10 },
-  { icon: Brain, label: 'Reviewed 25 flashcards', time: '3 hours ago', xp: 25 },
-  { icon: GraduationCap, label: 'Scored 85% on Neural Networks quiz', time: 'Yesterday', xp: 75 },
-  { icon: FlaskConical, label: 'Generated APA citations for research', time: 'Yesterday', xp: 15 },
-  { icon: BookOpen, label: 'Completed Chapter 3 study session', time: '2 days ago', xp: 40 },
-];
+function formatTimeAgo(isoDate: string): string {
+  const now = new Date();
+  const date = new Date(isoDate);
+  const diffMs = now.getTime() - date.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffHrs = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMin < 1) return 'Just now';
+  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffHrs < 24) return `${diffHrs}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
 
 export function DashboardPage() {
-  const { data: profile, isLoading } = useQuery({
-    queryKey: ['gamification-profile'],
-    queryFn: gamificationApi.getProfile,
+  const navigate = useNavigate();
+
+  // Fetch user profile
+  const { data: user } = useQuery({
+    queryKey: ['me'],
+    queryFn: authApi.getMe,
     retry: 1,
   });
 
-  const { data: badges = [] } = useQuery({
-    queryKey: ['badges'],
-    queryFn: gamificationApi.getBadges,
+  // Fetch real documents for recent activity
+  const { data: documents = [], isLoading } = useQuery({
+    queryKey: ['documents'],
+    queryFn: studyApi.getDocuments,
     retry: 1,
   });
 
-  const totalXp = profile?.total_xp ?? 0;
-  const level = profile?.level ?? 1;
-  const currentStreak = profile?.current_streak ?? 0;
-  const longestStreak = profile?.longest_streak ?? 0;
-  const dailyGoalProgress = profile?.daily_goal_progress ?? 0;
-  const dailyGoalTarget = profile?.daily_goal_target ?? 3;
-  const xpToNext = profile?.xp_to_next_level ?? 500;
-  const earnedBadges = badges.filter(b => b.earned).length;
-  const progressPct = Math.min(100, ((500 - xpToNext) / 500) * 100);
+  // Fetch flashcard decks for stats
+  const { data: decks = [] } = useQuery({
+    queryKey: ['decks'],
+    queryFn: studyApi.getDecks,
+    retry: 1,
+  });
 
   const greeting = getGreeting();
+  const userName = user?.full_name?.split(' ')[0] || 'Learner';
+  const totalCards = decks.reduce((acc, d) => acc + d.card_count, 0);
+  const totalDue = decks.reduce((acc, d) => acc + d.due_count, 0);
 
   if (isLoading) {
     return (
@@ -124,93 +134,58 @@ export function DashboardPage() {
       <motion.section className="dashboard-hero" variants={item}>
         <div className="hero-content">
           <h1 className="hero-title">
-            {greeting}, <span className="text-primary">Learner</span> 👋
+            {greeting}, <span className="text-primary">{userName}</span>
           </h1>
           <p className="hero-subtitle">
-            Ready to continue your learning journey? You're on a <strong>{currentStreak}-day streak</strong>!
+            Ready to continue your learning journey? You have <strong>{documents.length} document{documents.length !== 1 ? 's' : ''}</strong> uploaded.
           </p>
-        </div>
-        <div className="hero-streak">
-          <div className="hero-streak-flame">
-            <Flame size={32} />
-            <span className="hero-streak-count">{currentStreak}</span>
-          </div>
-          <span className="hero-streak-label">Day Streak</span>
         </div>
       </motion.section>
 
       {/* ── Stats Grid ── */}
       <motion.section className="stats-grid" variants={item}>
         <div className="stat-card stat-xp">
-          <div className="stat-icon-wrapper" style={{ background: 'linear-gradient(135deg, #FFC800, #FF9600)' }}>
-            <Zap size={20} color="white" />
+          <div className="stat-icon-wrapper" style={{ background: 'linear-gradient(135deg, #58CC02, #89E219)' }}>
+            <FileText size={20} color="white" />
           </div>
           <div className="stat-info">
-            <span className="stat-value">{totalXp.toLocaleString()}</span>
-            <span className="stat-label">Total XP</span>
+            <span className="stat-value">{documents.length}</span>
+            <span className="stat-label">Documents</span>
           </div>
-          <div className="stat-badge">Level {level}</div>
+          <div className="stat-badge">Uploaded</div>
         </div>
 
         <div className="stat-card stat-streak">
-          <div className="stat-icon-wrapper" style={{ background: 'linear-gradient(135deg, #FF9600, #FF4B4B)' }}>
-            <Flame size={20} color="white" />
+          <div className="stat-icon-wrapper" style={{ background: 'linear-gradient(135deg, #1CB0F6, #7BD5F9)' }}>
+            <Brain size={20} color="white" />
           </div>
           <div className="stat-info">
-            <span className="stat-value">{longestStreak}</span>
-            <span className="stat-label">Best Streak</span>
+            <span className="stat-value">{decks.length}</span>
+            <span className="stat-label">Flashcard Decks</span>
           </div>
-          <div className="stat-badge">{currentStreak} active</div>
+          <div className="stat-badge">{totalCards} cards</div>
         </div>
 
         <div className="stat-card stat-goal">
-          <div className="stat-icon-wrapper" style={{ background: 'linear-gradient(135deg, #58CC02, #89E219)' }}>
+          <div className="stat-icon-wrapper" style={{ background: 'linear-gradient(135deg, #FF9600, #FFC800)' }}>
             <Target size={20} color="white" />
           </div>
           <div className="stat-info">
-            <span className="stat-value">{dailyGoalProgress}/{dailyGoalTarget}</span>
-            <span className="stat-label">Daily Goals</span>
+            <span className="stat-value">{totalDue}</span>
+            <span className="stat-label">Cards Due</span>
           </div>
-          <div className="stat-progress-ring">
-            <svg viewBox="0 0 36 36" className="progress-ring-svg">
-              <path className="progress-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-              <path
-                className="progress-ring-fill"
-                strokeDasharray={`${dailyGoalTarget > 0 ? (dailyGoalProgress / dailyGoalTarget) * 100 : 0}, 100`}
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-              />
-            </svg>
-          </div>
+          <div className="stat-badge">To review</div>
         </div>
 
         <div className="stat-card stat-badges">
           <div className="stat-icon-wrapper" style={{ background: 'linear-gradient(135deg, #A855F7, #C084FC)' }}>
-            <Trophy size={20} color="white" />
+            <GraduationCap size={20} color="white" />
           </div>
           <div className="stat-info">
-            <span className="stat-value">{earnedBadges}</span>
-            <span className="stat-label">Badges Earned</span>
+            <span className="stat-value">{documents.filter(d => d.status === 'processed').length}</span>
+            <span className="stat-label">Ready for Study</span>
           </div>
-          <div className="stat-badge">View all</div>
-        </div>
-      </motion.section>
-
-      {/* ── XP Progress Bar ── */}
-      <motion.section className="xp-section" variants={item}>
-        <div className="xp-header">
-          <span className="xp-level-badge">Level {level}</span>
-          <span className="xp-progress-text">
-            {totalXp.toLocaleString()} XP &bull; {xpToNext} XP to next level
-          </span>
-          <span className="xp-level-badge">Level {level + 1}</span>
-        </div>
-        <div className="progress-bar xp-progress-bar">
-          <motion.div
-            className="progress-bar-fill"
-            initial={{ width: 0 }}
-            animate={{ width: `${progressPct}%` }}
-            transition={{ duration: 1, ease: 'easeOut', delay: 0.3 }}
-          />
+          <div className="stat-badge">Processed</div>
         </div>
       </motion.section>
 
@@ -222,15 +197,16 @@ export function DashboardPage() {
         </h2>
         <div className="quick-actions-grid">
           {quickActions.map((action, index) => (
-            <motion.a
+            <motion.div
               key={action.label}
-              href={action.to}
               className="quick-action-card"
               whileHover={{ y: -4, boxShadow: '0 12px 30px rgba(0,0,0,0.12)' }}
               whileTap={{ scale: 0.98 }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 * index + 0.3 }}
+              onClick={() => navigate(action.to)}
+              style={{ cursor: 'pointer' }}
             >
               <div className="quick-action-icon" style={{ background: action.gradient }}>
                 <action.icon size={24} color="white" />
@@ -240,79 +216,66 @@ export function DashboardPage() {
                 <span className="quick-action-desc">{action.description}</span>
               </div>
               <ArrowRight size={18} className="quick-action-arrow" />
-            </motion.a>
+            </motion.div>
           ))}
         </div>
       </motion.section>
 
-      {/* ── Recent Activity ── */}
+      {/* ── Recent Activity (Real documents) ── */}
       <motion.section variants={item}>
         <h2 className="section-title">
           <Clock size={20} className="text-primary" />
           Recent Activity
         </h2>
         <div className="activity-list">
-          {recentActivities.map((activity, index) => (
-            <motion.div
-              key={index}
-              className="activity-item"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.05 * index + 0.5 }}
-            >
-              <div className="activity-icon">
-                <activity.icon size={16} />
-              </div>
-              <div className="activity-content">
-                <span className="activity-label">{activity.label}</span>
-                <span className="activity-time">{activity.time}</span>
-              </div>
-              <div className="activity-xp badge badge-xp">+{activity.xp} XP</div>
-            </motion.div>
-          ))}
+          {documents.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+              <FileText size={48} style={{ opacity: 0.2, marginBottom: '12px' }} />
+              <p>No activity yet — upload your first PDF in Study Hub to get started!</p>
+            </div>
+          ) : (
+            documents.slice(0, 5).map((doc, index) => (
+              <motion.div
+                key={doc.id}
+                className="activity-item"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.05 * index + 0.5 }}
+                style={{ cursor: 'pointer' }}
+                onClick={() => navigate('/study')}
+              >
+                <div className="activity-icon">
+                  <FileText size={16} />
+                </div>
+                <div className="activity-content">
+                  <span className="activity-label">Uploaded "{doc.title}"</span>
+                  <span className="activity-time">{formatTimeAgo(doc.created_at)}</span>
+                </div>
+                <div className={`document-status ${doc.status}`} style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '6px' }}>
+                  {doc.status === 'processed' ? 'Ready' : doc.status === 'processing' ? 'Processing' : 'Error'}
+                </div>
+              </motion.div>
+            ))
+          )}
         </div>
       </motion.section>
 
-      {/* ── Learning Insights ── */}
+      {/* ── Learning Overview ── */}
       <motion.section className="insights-section" variants={item}>
         <h2 className="section-title">
           <TrendingUp size={20} className="text-primary" />
-          Learning Insights
+          Learning Overview
         </h2>
         <div className="insights-grid">
           <div className="insight-card">
             <div className="insight-header">
-              <span className="insight-label">Study Time Today</span>
-              <span className="insight-value">2h 35m</span>
-            </div>
-            <div className="insight-chart">
-              {[40, 65, 50, 80, 70, 90, 55].map((height, i) => (
-                <motion.div
-                  key={i}
-                  className="insight-bar"
-                  initial={{ height: 0 }}
-                  animate={{ height: `${height}%` }}
-                  transition={{ delay: 0.1 * i + 0.6, duration: 0.5, ease: 'easeOut' }}
-                />
-              ))}
-            </div>
-            <div className="insight-days">
-              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
-                <span key={day} className="insight-day">{day}</span>
-              ))}
-            </div>
-          </div>
-
-          <div className="insight-card">
-            <div className="insight-header">
-              <span className="insight-label">Top Subjects</span>
+              <span className="insight-label">Documents by Status</span>
             </div>
             <div className="subject-list">
               {[
-                { name: 'Machine Learning', progress: 78, color: '#58CC02' },
-                { name: 'Data Structures', progress: 62, color: '#1CB0F6' },
-                { name: 'Neural Networks', progress: 45, color: '#FF9600' },
-                { name: 'Statistics', progress: 34, color: '#A855F7' },
+                { name: 'Processed', progress: documents.length > 0 ? Math.round((documents.filter(d => d.status === 'processed').length / documents.length) * 100) : 0, color: '#58CC02' },
+                { name: 'Processing', progress: documents.length > 0 ? Math.round((documents.filter(d => d.status === 'processing').length / documents.length) * 100) : 0, color: '#1CB0F6' },
+                { name: 'Error', progress: documents.length > 0 ? Math.round((documents.filter(d => d.status === 'error').length / documents.length) * 100) : 0, color: '#FF4B4B' },
               ].map((subject, i) => (
                 <div key={subject.name} className="subject-row">
                   <span className="subject-name">{subject.name}</span>
@@ -328,6 +291,30 @@ export function DashboardPage() {
                   <span className="subject-pct">{subject.progress}%</span>
                 </div>
               ))}
+            </div>
+          </div>
+
+          <div className="insight-card">
+            <div className="insight-header">
+              <span className="insight-label">Study Stats</span>
+            </div>
+            <div className="subject-list">
+              <div className="subject-row">
+                <span className="subject-name">Total Docs</span>
+                <span style={{ fontWeight: 700, color: 'var(--color-text-heading)', fontSize: '18px', marginLeft: 'auto' }}>{documents.length}</span>
+              </div>
+              <div className="subject-row">
+                <span className="subject-name">Total Decks</span>
+                <span style={{ fontWeight: 700, color: 'var(--color-text-heading)', fontSize: '18px', marginLeft: 'auto' }}>{decks.length}</span>
+              </div>
+              <div className="subject-row">
+                <span className="subject-name">Total Cards</span>
+                <span style={{ fontWeight: 700, color: 'var(--color-text-heading)', fontSize: '18px', marginLeft: 'auto' }}>{totalCards}</span>
+              </div>
+              <div className="subject-row">
+                <span className="subject-name">Due Today</span>
+                <span style={{ fontWeight: 700, color: 'var(--color-primary)', fontSize: '18px', marginLeft: 'auto' }}>{totalDue}</span>
+              </div>
             </div>
           </div>
         </div>

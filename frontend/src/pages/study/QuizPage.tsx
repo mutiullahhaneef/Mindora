@@ -3,13 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { GraduationCap, Trophy, Sparkles, AlertCircle, FileText, ChevronRight, CheckCircle, XCircle } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { studyApi } from '../../lib/api/study';
-import { useGamificationStore } from '../../lib/stores/gamificationStore';
 import './QuizPage.css';
 
 export function QuizPage() {
   const qc = useQueryClient();
-  const awardXp = useGamificationStore(state => state.awardXp);
-  const updateStreak = useGamificationStore(state => state.updateStreak);
 
   // States
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
@@ -72,10 +69,6 @@ export function QuizPage() {
       setSelectedAnswer(null);
       setShowResult(false);
     } else {
-      // Award XP on complete
-      const xpReward = score * 25 + 50;
-      awardXp(xpReward, `Completed Quiz Arena`);
-      updateStreak();
       setIsFinished(true);
     }
   };
@@ -153,9 +146,6 @@ export function QuizPage() {
             </p>
             <div className="quiz-score-pct">
               {Math.round((score / questions.length) * 100)}%
-            </div>
-            <div className="quiz-xp-reward badge badge-xp animate-pulse">
-              +{score * 25 + 50} XP
             </div>
             <div className="result-actions">
               <button className="btn btn-secondary btn-lg" onClick={() => setSelectedDocId(null)}>

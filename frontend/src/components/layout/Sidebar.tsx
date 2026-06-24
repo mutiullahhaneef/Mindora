@@ -7,16 +7,12 @@ import {
   BookOpen,
   FlaskConical,
   Brain,
-  Trophy,
   Settings,
   ChevronLeft,
   ChevronRight,
-  Flame,
   GraduationCap,
-  FileText,
   Sparkles,
 } from 'lucide-react';
-import { useGamificationStore } from '../../lib/stores/gamificationStore';
 import './Sidebar.css';
 
 interface SidebarProps {
@@ -30,8 +26,6 @@ const navItems = [
   { to: '/flashcards', icon: Brain, label: 'Flashcards' },
   { to: '/quiz', icon: GraduationCap, label: 'Quiz Arena' },
   { to: '/research', icon: FlaskConical, label: 'Research' },
-  { to: '/papers', icon: FileText, label: 'Papers' },
-  { to: '/achievements', icon: Trophy, label: 'Achievements' },
 ];
 
 const bottomNavItems = [
@@ -40,7 +34,6 @@ const bottomNavItems = [
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const location = useLocation();
-  const { currentStreak, level, totalXp } = useGamificationStore();
 
   const { data: user } = useQuery({
     queryKey: ['me'],
@@ -132,34 +125,6 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 {user.full_name.charAt(0).toUpperCase()}
               </div>
             )}
-          </div>
-        )}
-
-        {/* Streak Widget */}
-        <AnimatePresence>
-          {!collapsed && (
-            <motion.div
-              className="streak-widget"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-            >
-              <div className="streak-flame-container">
-                <Flame size={20} className="streak-icon" />
-                <span className="streak-count">{currentStreak}</span>
-              </div>
-              <div className="streak-info">
-                <span className="streak-label">Day Streak</span>
-                <span className="streak-sublabel">Level {level} · {totalXp.toLocaleString()} XP</span>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {collapsed && (
-          <div className="streak-widget-mini" data-tooltip={`${currentStreak} day streak`}>
-            <Flame size={18} className="streak-icon" />
-            <span className="streak-count-mini">{currentStreak}</span>
           </div>
         )}
 
