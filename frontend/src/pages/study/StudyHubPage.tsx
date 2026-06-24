@@ -70,8 +70,12 @@ export function StudyHubPage() {
       setUploadError('');
     },
     onError: (err: unknown) => {
-      const e = err as { response?: { data?: { detail?: string } } };
-      setUploadError(e.response?.data?.detail || 'Upload failed. Please try again.');
+      const e = err as { response?: { status?: number; data?: { detail?: string; message?: string } } };
+      if (e.response?.status === 401) {
+        setUploadError('Authentication required. Please log in again.');
+      } else {
+        setUploadError(e.response?.data?.detail || e.response?.data?.message || 'Upload failed. Please try again.');
+      }
       setUploadProgress(null);
     },
   });

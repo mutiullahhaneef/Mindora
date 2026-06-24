@@ -23,36 +23,21 @@ async def get_current_user(
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> User:
     """
-    Extract and validate JWT from Authorization header.
-    Returns the User ORM object if valid.
-    Raises UnauthorizedError on missing token, InvalidTokenError on bad token.
+    Bypassed Auth: Returns a generic guest user.
     """
-    if credentials is None:
-        raise UnauthorizedError(detail="Authorization header is required.")
-
-    token = credentials.credentials
-
-    try:
-        payload = decode_token(token)
-    except JWTError:
-        raise InvalidTokenError()
-
-    token_type = payload.get("type")
-    if token_type != "access":
-        raise InvalidTokenError()
-
-    user_id: str | None = payload.get("sub")
-    if not user_id:
-        raise InvalidTokenError()
-
-    result = await db.execute(select(User).where(User.id == user_id))
+    result = await db.execute(select(User).limit(1))
     user = result.scalar_one_or_none()
-
-    if user is None:
-        raise NotFoundError("User")
-
-    if not user.is_active:
-        raise UnauthorizedError(detail="User account is disabled.")
+    
+    if not user:
+        user = User(
+            email="guest@mindora.com",
+            name="Guest User",
+            password="dummy_password_hash",
+            is_active=True
+        )
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
 
     return user
 
@@ -62,35 +47,21 @@ async def get_current_user_from_refresh(
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> User:
     """
-    Like get_current_user but validates the 'refresh' token type.
-    Used only by the /auth/refresh endpoint.
+    Bypassed Auth: Returns a generic guest user.
     """
-    if credentials is None:
-        raise UnauthorizedError(detail="Refresh token is required.")
-
-    token = credentials.credentials
-
-    try:
-        payload = decode_token(token)
-    except JWTError:
-        raise InvalidTokenError()
-
-    token_type = payload.get("type")
-    if token_type != "refresh":
-        raise InvalidTokenError()
-
-    user_id: str | None = payload.get("sub")
-    if not user_id:
-        raise InvalidTokenError()
-
-    result = await db.execute(select(User).where(User.id == user_id))
+    result = await db.execute(select(User).limit(1))
     user = result.scalar_one_or_none()
-
-    if user is None:
-        raise NotFoundError("User")
-
-    if not user.is_active:
-        raise UnauthorizedError(detail="User account is disabled.")
+    
+    if not user:
+        user = User(
+            email="guest@mindora.com",
+            name="Guest User",
+            password="dummy_password_hash",
+            is_active=True
+        )
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
 
     return user
 

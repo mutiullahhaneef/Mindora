@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
-from app.core.dependencies import get_current_user_from_refresh, DbSession
+from app.core.dependencies import get_current_user, get_current_user_from_refresh, DbSession
 from app.models.user import User
 from app.schemas.auth import RegisterRequest, LoginRequest, UserOut, TokenOut, AccessTokenOut
 from app.schemas.common import ok
@@ -63,10 +63,9 @@ async def refresh_token(
 
 @router.get("/me", summary="Get current user profile")
 async def me(
-    user: Annotated[User, Depends(get_current_user_from_refresh)],
+    user: Annotated[User, Depends(get_current_user)],
 ):
     """Returns the authenticated user's profile. Requires access token."""
-    # Re-use the dependency but this is for the access token version
     return ok(
         data=UserOut(user_id=user.id, email=user.email, name=user.name),
         message="Profile fetched.",

@@ -5,9 +5,6 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
 export const apiClient = axios.create({
   baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
 
 // Interceptor for attaching auth tokens (once we implement full auth)
@@ -25,8 +22,13 @@ apiClient.interceptors.response.use(
   (error) => {
     // Handle global API errors (e.g., 401 Unauthorized)
     if (error.response?.status === 401) {
-      // Redirect to login or clear state
-      console.error('Unauthorized access');
+      // Clear invalid/expired token and redirect to login
+      const token = localStorage.getItem('mindora-token');
+      if (token) {
+        localStorage.removeItem('mindora-token');
+        // Reload to trigger AuthPage — avoid infinite loops by checking token existed
+        window.location.reload();
+      }
     }
     return Promise.reject(error);
   }

@@ -100,6 +100,9 @@ export const studyApi = {
     formData.append('file', file);
     // Response envelope: { success, data: { document_id, status }, message }
     const res = await apiClient.post('/study/documents/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
       onUploadProgress: (evt) => {
         if (onProgress && evt.total) {
           onProgress(Math.round((evt.loaded / evt.total) * 100));

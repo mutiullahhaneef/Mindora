@@ -1,4 +1,4 @@
-import { Search, Bell, Sun, Moon, Menu, Check, MailOpen } from 'lucide-react';
+import { Search, Bell, Sun, Moon, Menu, MailOpen } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';

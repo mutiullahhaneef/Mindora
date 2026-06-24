@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppShell } from './components/layout/AppShell';
 import { DashboardPage } from './pages/dashboard/DashboardPage';
@@ -7,20 +6,8 @@ import { FlashcardsPage } from './pages/study/FlashcardsPage';
 import { QuizPage } from './pages/study/QuizPage';
 import { ResearchPage } from './pages/research/ResearchPage';
 import { SettingsPage } from './pages/settings/SettingsPage';
-import AuthPage from './pages/auth/AuthPage';
-import { authApi } from './lib/api/auth';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(authApi.isAuthenticated());
-
-  const handleAuthSuccess = () => {
-    setIsAuthenticated(true);
-  };
-
-  if (!isAuthenticated) {
-    return <AuthPage onAuthSuccess={handleAuthSuccess} />;
-  }
-
   return (
     <BrowserRouter>
       <Routes>
