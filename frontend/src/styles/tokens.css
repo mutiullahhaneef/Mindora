@@ -1,0 +1,231 @@
+/* ============================================
+   MINDORA DESIGN TOKENS
+   Duolingo-inspired, playful yet professional
+   ============================================ */
+
+:root {
+  /* ── Primary Colors ── */
+  --color-primary: #58CC02;
+  --color-primary-hover: #4BB200;
+  --color-primary-light: #89E219;
+  --color-primary-subtle: #E8F9D4;
+  --color-primary-glow: rgba(88, 204, 2, 0.25);
+
+  /* ── Accent Colors ── */
+  --color-accent: #1CB0F6;
+  --color-accent-hover: #1899D6;
+  --color-accent-light: #7BD5F9;
+  --color-accent-subtle: #DDF4FF;
+
+  /* ── Semantic Colors ── */
+  --color-success: #58CC02;
+  --color-warning: #FFC800;
+  --color-warning-subtle: #FFF4CC;
+  --color-error: #FF4B4B;
+  --color-error-subtle: #FFE0E0;
+  --color-info: #1CB0F6;
+
+  /* ── XP / Gamification ── */
+  --color-xp: #FFC800;
+  --color-xp-glow: rgba(255, 200, 0, 0.3);
+  --color-streak: #FF9600;
+  --color-streak-glow: rgba(255, 150, 0, 0.35);
+  --color-badge-gold: #FFD700;
+  --color-badge-silver: #C0C0C0;
+  --color-badge-bronze: #CD7F32;
+  --color-level-ring: #A855F7;
+
+  /* ── Backgrounds ── */
+  --color-bg: #FFFFFF;
+  --color-bg-secondary: #F7F7F7;
+  --color-bg-tertiary: #EFEFEF;
+
+  /* ── Surfaces ── */
+  --color-surface: #FFFFFF;
+  --color-surface-hover: #F7F7F7;
+  --color-surface-active: #EFEFEF;
+  --color-surface-raised: #FFFFFF;
+
+  /* ── Text ── */
+  --color-text: #4B4B4B;
+  --color-text-heading: #3C3C3C;
+  --color-text-muted: #777777;
+  --color-text-disabled: #AFAFAF;
+  --color-text-inverse: #FFFFFF;
+  --color-text-link: #1CB0F6;
+
+  /* ── Borders ── */
+  --color-border: #E5E5E5;
+  --color-border-hover: #D0D0D0;
+  --color-border-focus: #58CC02;
+  --color-border-subtle: #F0F0F0;
+
+  /* ── Sidebar ── */
+  --color-sidebar-bg: #FFFFFF;
+  --color-sidebar-hover: #F0FDE4;
+  --color-sidebar-active: #E8F9D4;
+  --color-sidebar-text: #4B4B4B;
+  --color-sidebar-text-active: #58CC02;
+  --color-sidebar-border: #E5E5E5;
+
+  /* ── Glassmorphism ── */
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-blur: 12px;
+  --glass-border: rgba(255, 255, 255, 0.4);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+
+  /* ── Shadows ── */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.14);
+  --shadow-glow-primary: 0 0 20px rgba(88, 204, 2, 0.2);
+  --shadow-glow-accent: 0 0 20px rgba(28, 176, 246, 0.2);
+  --shadow-float: 0 8px 25px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+
+  /* ── Spacing ── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ── Radii ── */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 9999px;
+
+  /* ── Typography ── */
+  --font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-display: 'Plus Jakarta Sans', 'Inter', sans-serif;
+
+  --text-xs: 0.75rem;     /* 12px */
+  --text-sm: 0.875rem;    /* 14px */
+  --text-base: 1rem;      /* 16px */
+  --text-lg: 1.125rem;    /* 18px */
+  --text-xl: 1.25rem;     /* 20px */
+  --text-2xl: 1.5rem;     /* 24px */
+  --text-3xl: 2rem;       /* 32px */
+  --text-4xl: 2.5rem;     /* 40px */
+
+  --leading-tight: 1.2;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.65;
+
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-extrabold: 800;
+
+  /* ── Motion ── */
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 500ms;
+  --ease-out: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ── Z-Index Scale ── */
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal-backdrop: 300;
+  --z-modal: 400;
+  --z-toast: 500;
+  --z-orb: 600;
+  --z-tooltip: 700;
+
+  /* ── Layout ── */
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 72px;
+  --topbar-height: 64px;
+  --max-content-width: 1440px;
+  --orb-size: 56px;
+}
+
+/* ============================================
+   DARK MODE TOKENS
+   Deep navy + neon green + glassmorphism
+   ============================================ */
+[data-theme='dark'] {
+  /* ── Primary ── */
+  --color-primary: #58CC02;
+  --color-primary-hover: #6FE020;
+  --color-primary-light: #3A8A01;
+  --color-primary-subtle: #1A3D0A;
+  --color-primary-glow: rgba(88, 204, 2, 0.35);
+
+  /* ── Accent ── */
+  --color-accent: #1CB0F6;
+  --color-accent-hover: #47C2F9;
+  --color-accent-light: #0D5F8A;
+  --color-accent-subtle: #0A2A40;
+
+  /* ── Semantic ── */
+  --color-success: #58CC02;
+  --color-warning: #FFD84D;
+  --color-warning-subtle: #3D3200;
+  --color-error: #FF6B6B;
+  --color-error-subtle: #3D1616;
+  --color-info: #1CB0F6;
+
+  /* ── Backgrounds ── */
+  --color-bg: #0B0A2A;
+  --color-bg-secondary: #100F3E;
+  --color-bg-tertiary: #151450;
+
+  /* ── Surfaces ── */
+  --color-surface: #1A1952;
+  --color-surface-hover: #222170;
+  --color-surface-active: #2A2970;
+  --color-surface-raised: #1E1D5F;
+
+  /* ── Text ── */
+  --color-text: #E8E8E8;
+  --color-text-heading: #FFFFFF;
+  --color-text-muted: #9B9BB0;
+  --color-text-disabled: #5A5A7A;
+  --color-text-inverse: #100F3E;
+  --color-text-link: #47C2F9;
+
+  /* ── Borders ── */
+  --color-border: #2A2970;
+  --color-border-hover: #3A3990;
+  --color-border-focus: #58CC02;
+  --color-border-subtle: #1E1D5F;
+
+  /* ── Sidebar ── */
+  --color-sidebar-bg: #0E0D30;
+  --color-sidebar-hover: #1A1952;
+  --color-sidebar-active: #1E2D1A;
+  --color-sidebar-text: #9B9BB0;
+  --color-sidebar-text-active: #58CC02;
+  --color-sidebar-border: #1E1D5F;
+
+  /* ── Glassmorphism (Dark) ── */
+  --glass-bg: rgba(16, 15, 62, 0.65);
+  --glass-blur: 16px;
+  --glass-border: rgba(88, 204, 2, 0.12);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+  /* ── Shadows (Dark) ── */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.5);
+  --shadow-glow-primary: 0 0 25px rgba(88, 204, 2, 0.3);
+  --shadow-glow-accent: 0 0 25px rgba(28, 176, 246, 0.3);
+  --shadow-float: 0 8px 25px rgba(0, 0, 0, 0.35), 0 0 15px rgba(88, 204, 2, 0.08);
+}

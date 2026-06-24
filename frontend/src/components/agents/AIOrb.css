@@ -1,0 +1,205 @@
+/* ── AI Orb Button ── */
+.ai-orb {
+  position: fixed;
+  bottom: var(--space-8);
+  right: var(--space-8);
+  width: var(--orb-size);
+  height: var(--orb-size);
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  z-index: var(--z-orb);
+  transition: box-shadow var(--duration-normal) var(--ease-out);
+}
+
+.orb-green {
+  background: linear-gradient(135deg, #58CC02, #89E219);
+  box-shadow:
+    0 4px 15px rgba(88, 204, 2, 0.35),
+    0 0 30px rgba(88, 204, 2, 0.15);
+  animation: orbBreathing 4s ease-in-out infinite;
+}
+
+.orb-green:hover {
+  box-shadow:
+    0 4px 20px rgba(88, 204, 2, 0.5),
+    0 0 50px rgba(88, 204, 2, 0.25);
+}
+
+.orb-neon {
+  background: linear-gradient(135deg, #1CB0F6, #47C2F9);
+  box-shadow:
+    0 4px 15px rgba(28, 176, 246, 0.4),
+    0 0 30px rgba(28, 176, 246, 0.2);
+  animation: orbBreathing 4s ease-in-out infinite;
+}
+
+.orb-neon:hover {
+  box-shadow:
+    0 4px 20px rgba(28, 176, 246, 0.6),
+    0 0 50px rgba(28, 176, 246, 0.3);
+}
+
+.orb-active {
+  animation: none !important;
+}
+
+.orb-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Chat Panel ── */
+.orb-panel {
+  position: fixed;
+  bottom: calc(var(--orb-size) + var(--space-8) + var(--space-4));
+  right: var(--space-8);
+  width: 380px;
+  max-height: 520px;
+  border-radius: var(--radius-xl);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: var(--z-orb);
+}
+
+.orb-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.orb-panel-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-base);
+  color: var(--color-text-heading);
+}
+
+/* ── Messages ── */
+.orb-panel-messages {
+  flex: 1;
+  padding: var(--space-4);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-height: 200px;
+}
+
+.orb-message {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.orb-message-ai {
+  align-self: flex-start;
+}
+
+.orb-message-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary), #89E219);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.orb-message-content {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  border-top-left-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  max-width: 280px;
+}
+
+.orb-message-content p {
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text);
+}
+
+.orb-message-time {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--space-1);
+  display: block;
+}
+
+/* ── Input ── */
+.orb-panel-input {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.orb-input {
+  flex: 1;
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  background: var(--color-bg-secondary);
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-pill);
+  outline: none;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.orb-input:focus {
+  border-color: var(--color-primary);
+  background: var(--color-surface);
+}
+
+.orb-input::placeholder {
+  color: var(--color-text-disabled);
+}
+
+.orb-voice {
+  color: var(--color-text-muted);
+}
+
+.orb-voice:hover {
+  color: var(--color-primary);
+}
+
+.orb-send {
+  color: var(--color-primary);
+}
+
+.orb-send:disabled {
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .ai-orb {
+    bottom: 90px;
+    right: var(--space-4);
+    width: 50px;
+    height: 50px;
+  }
+
+  .orb-panel {
+    bottom: calc(50px + 90px + var(--space-3));
+    right: var(--space-3);
+    left: var(--space-3);
+    width: auto;
+    max-height: 60vh;
+  }
+}

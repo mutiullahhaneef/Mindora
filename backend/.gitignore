@@ -1,0 +1,48 @@
+# ─── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+.Python
+*.pyc
+
+# ─── Virtual environment ───────────────────────────────────────────────────────
+venv/
+.venv/
+env/
+ENV/
+
+# ─── Environment / secrets ────────────────────────────────────────────────────
+.env
+*.env
+!.env.example
+
+# ─── Uploads ──────────────────────────────────────────────────────────────────
+uploads/
+!uploads/.gitkeep
+
+# ─── ChromaDB data ────────────────────────────────────────────────────────────
+chroma_storage/
+chroma_data/
+
+# ─── IDE ──────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ─── OS ───────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ─── Alembic ──────────────────────────────────────────────────────────────────
+# Keep migrations, but ignore local dev artifacts
+alembic/versions/__pycache__/
+
+# ─── Testing ──────────────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/

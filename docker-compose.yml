@@ -1,0 +1,128 @@
+services:
+  # ─── FastAPI Application ─────────────────────────────────────────────────────
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mindora_api
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=Mindora
+      - DEBUG=False
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/mindora
+      - REDIS_URL=redis://redis:6379/0
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-jwt-secret-change-me}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENAI_MODEL=gpt-4o-mini
+      - USE_OLLAMA=${USE_OLLAMA:-False}
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - CORS_ORIGINS=["http://localhost:5173","http://localhost:3000"]
+      - UPLOAD_DIR=/app/uploads
+      - CHROMA_PERSIST_DIR=/app/chroma_storage
+    volumes:
+      - ./backend/uploads:/app/uploads
+      - chroma_data:/app/chroma_storage
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - mindora-network
+    restart: unless-stopped
+
+  # ─── PostgreSQL + pgvector ────────────────────────────────────────────────────
+  db:
+    image: pgvector/pgvector:pg15
+    container_name: mindora_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: mindora
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d mindora"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mindora-network
+    restart: unless-stopped
+
+  # ─── Redis ───────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: mindora_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mindora-network
+    restart: unless-stopped
+
+  # ─── Celery Worker ───────────────────────────────────────────────────────────
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mindora_worker
+    command: celery -A app.tasks.celery_app worker --loglevel=info --concurrency=4
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/mindora
+      - REDIS_URL=redis://redis:6379/0
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - USE_OLLAMA=${USE_OLLAMA:-False}
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - UPLOAD_DIR=/app/uploads
+      - CHROMA_PERSIST_DIR=/app/chroma_storage
+    volumes:
+      - ./backend/uploads:/app/uploads
+      - chroma_data:/app/chroma_storage
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - mindora-network
+    restart: unless-stopped
+
+  # ─── ChromaDB ────────────────────────────────────────────────────────────────
+  chroma:
+    image: chromadb/chroma:latest
+    container_name: mindora_chroma
+    ports:
+      - "8001:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - ANONYMIZED_TELEMETRY=False
+    networks:
+      - mindora-network
+    restart: unless-stopped
+
+# ─── Volumes ─────────────────────────────────────────────────────────────────
+volumes:
+  postgres_data:
+    name: mindora_postgres_data
+  redis_data:
+    name: mindora_redis_data
+  chroma_data:
+    name: mindora_chroma_data
+
+# ─── Networks ────────────────────────────────────────────────────────────────
+networks:
+  mindora-network:
+    name: mindora-network
+    driver: bridge
