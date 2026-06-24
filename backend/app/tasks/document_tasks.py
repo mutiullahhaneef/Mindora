@@ -38,12 +38,27 @@ def process_document(self, document_id: str) -> dict:
 
 async def _async_process_document(task, document_id: str) -> dict:
     """Async implementation of the document processing pipeline."""
-    from app.db.session import AsyncSessionLocal
+    from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+    from sqlalchemy.pool import NullPool
+    from app.config import settings
     from app.models.document import Document, DocumentStatus
     from app.ai.parser import DocumentParser
     from app.ai.rag import RAGService
 
-    async with AsyncSessionLocal() as db:
+    # Create a dedicated engine for Celery tasks using NullPool
+    # This prevents 'attached to a different loop' errors when asyncio.run() creates new event loops
+    engine = create_async_engine(
+        settings.DATABASE_URL,
+        poolclass=NullPool,
+        echo=False
+    )
+    CelerySessionLocal = async_sessionmaker(
+        bind=engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
+    )
+
+    async with CelerySessionLocal() as db:
         try:
             # Fetch document
             result = await db.execute(

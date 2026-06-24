@@ -95,6 +95,19 @@ export function StudyHubPage() {
     },
   });
 
+  // Notes Drawer States
+  const [notesDocId, setNotesDocId] = useState<string | null>(null);
+  const [generatedNotes, setGeneratedNotes] = useState<string>('');
+
+  // Generate Notes Mutation
+  const generateNotesMutation = useMutation({
+    mutationFn: (docId: string) => studyApi.generateNotes(docId),
+    onSuccess: (data, docId) => {
+      setGeneratedNotes(data);
+      setNotesDocId(docId);
+    },
+  });
+
   const handleFile = (file: File) => {
     if (!file.name.endsWith('.pdf') && file.type !== 'text/plain') {
       setUploadError('Only PDF files are supported.');
@@ -381,6 +394,14 @@ export function StudyHubPage() {
                       >
                         <Brain size={16} /> Cards
                       </button>
+                      <button 
+                        className="btn btn-sm btn-ghost" 
+                        title="Generate Notes"
+                        onClick={() => generateNotesMutation.mutate(doc.id)}
+                        disabled={isGenPending || (generateNotesMutation.isPending && generateNotesMutation.variables === doc.id)}
+                      >
+                        {(generateNotesMutation.isPending && generateNotesMutation.variables === doc.id) ? <Loader2 size={16} className="spin" /> : <FileText size={16} />} Notes
+                      </button>
                       <button
                         className="btn btn-sm btn-ghost"
                         title="Delete"
@@ -523,6 +544,39 @@ export function StudyHubPage() {
                   <Send size={16} />
                 </button>
               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* CONTEXTUAL STUDY NOTES SIDEBAR DRAWER */}
+      <AnimatePresence>
+        {notesDocId && (
+          <div 
+            className="chat-drawer-overlay"
+            onClick={() => setNotesDocId(null)}
+          >
+            <motion.div 
+              className="chat-drawer"
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="chat-drawer-header">
+                <div className="flex items-center gap-2">
+                  <FileText className="text-primary" />
+                  <h3>Generated Notes</h3>
+                </div>
+                <button className="icon-btn" onClick={() => setNotesDocId(null)}>
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="chat-drawer-messages" style={{ whiteSpace: 'pre-wrap', padding: '24px', overflowY: 'auto' }}>
+                {generatedNotes}
+              </div>
             </motion.div>
           </div>
         )}

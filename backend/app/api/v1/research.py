@@ -207,18 +207,44 @@ async def delete_citation(paper_id: str, citation_id: str, user: CurrentUser):
     return ok(message="Citation deleted successfully.")
 
 
+from app.ai.ai_service import AIService
+
 @router.post("/tools/paraphrase", summary="Paraphrase academic text")
 async def paraphrase_text(body: ParaphraseRequest, user: CurrentUser):
-    paraphrased = f"[Paraphrased ({body.tone} tone)]: {body.text[::-1][:100]}... (Simulated academic paraphrase)"
+    ai_service = AIService()
+    prompt = f"Paraphrase the following text in a {body.tone} tone:\n\n{body.text}"
+    system = "You are an expert academic writer. Respond only with the paraphrased text. Do not include any additional commentary."
+    
+    try:
+        paraphrased = await ai_service.complete(prompt=prompt, system=system)
+    except Exception as e:
+        paraphrased = f"[Error: {str(e)}]"
+        
     return ok(data={"paraphrased": paraphrased})
 
 
 @router.post("/tools/grammar", summary="Check academic grammar")
 async def check_grammar(body: GrammarRequest, user: CurrentUser):
+    ai_service = AIService()
+    prompt = f"Check the following text for grammar errors and suggest improvements:\n\n{body.text}"
+    system = '''You are an expert grammar checker. Return your response ONLY in the following JSON format:
+{
+    "corrected": "The full text with grammar corrected",
+    "suggestions": ["suggestion 1", "suggestion 2"]
+}'''
+    
+    try:
+        result = await ai_service.complete_json(prompt=prompt, system=system)
+        corrected = result.get("corrected", body.text)
+        suggestions = result.get("suggestions", [])
+    except Exception as e:
+        corrected = body.text
+        suggestions = [f"Error checking grammar: {str(e)}"]
+        
     return ok(
         data={
-            "corrected": body.text,
-            "suggestions": ["No errors detected in simulated check!"]
+            "corrected": corrected,
+            "suggestions": suggestions
         }
     )
 

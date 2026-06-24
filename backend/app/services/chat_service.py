@@ -69,5 +69,5 @@ class ChatService:
         full_prompt = f"{history_text}\nUser: {message}" if history_text else message
 
         # Stream AI response
-        async for chunk in ai_service.stream(full_prompt, system=system):
+        async for chunk in ai_service.complete_stream(full_prompt, system=system):
             yield chunk

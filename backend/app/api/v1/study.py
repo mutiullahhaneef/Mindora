@@ -87,7 +87,7 @@ async def generate_flashcards(document_id: str, user: CurrentUser, db: DbSession
         logger.exception("Failed to generate flashcards using AI: %s", e)
         # Fallback cards if AI generation fails
         cards_data = [
-            {"front": f"What is the main topic of {doc.title}?", "back": "Refer to the document text for comprehensive details."},
+            {"front": f"What is the main topic of {doc.filename}?", "back": "Refer to the document text for comprehensive details."},
             {"front": "Key concept 1", "back": "Explanation of the key concept discussed in the document."}
         ]
 
@@ -95,7 +95,7 @@ async def generate_flashcards(document_id: str, user: CurrentUser, db: DbSession
     deck = FlashcardDeck(
         user_id=user.id,
         document_id=document_id,
-        title=f"Deck: {doc.title}",
+        title=f"Deck: {doc.filename}",
         color="#1CB0F6"
     )
     db.add(deck)
@@ -127,6 +127,34 @@ async def generate_flashcards(document_id: str, user: CurrentUser, db: DbSession
             mastered_count=0
         )
     )
+
+
+@router.post("/documents/{document_id}/notes/generate", summary="Generate notes from document")
+async def generate_notes(document_id: str, user: CurrentUser, db: DbSession):
+    # Fetch document
+    doc_result = await db.execute(
+        select(Document).where(Document.id == document_id, Document.user_id == user.id)
+    )
+    doc = doc_result.scalar_one_or_none()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+        
+    text_content = doc.raw_text or "No text content available."
+    
+    prompt = (
+        "Generate comprehensive, structured study notes from the following text. "
+        "Use markdown formatting with headers, bullet points, and bold text for key terms. "
+        "Organize the information logically and keep it highly informative.\n\n"
+        f"Text:\n{text_content[:8000]}"
+    )
+    
+    try:
+        notes_markdown = await ai_service.complete(prompt)
+    except Exception as e:
+        logger.exception("Failed to generate notes using AI: %s", e)
+        notes_markdown = f"# Notes for {doc.filename}\n\nCould not generate notes at this time. Error: {str(e)}"
+        
+    return ok(data={"notes": notes_markdown})
 
 
 @router.get("/flashcards/decks", summary="Get all user decks")
@@ -314,7 +342,7 @@ async def generate_quiz(document_id: str, user: CurrentUser, db: DbSession):
         # Fallback quiz questions
         questions_data = [
             {
-                "question_text": f"What is the primary topic of the document '{doc.title}'?",
+                "question_text": f"What is the primary topic of the document '{doc.filename}'?",
                 "options": ["A detailed case study", "General overview and concepts", "A historical timeline", "A coding tutorial"],
                 "correct_option_index": 1,
                 "explanation": "The document contains general overview and concepts regarding its subject matter."

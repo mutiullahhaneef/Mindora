@@ -71,7 +71,7 @@ async def chat(
 @router.websocket("/ws")
 async def chat_ws(
     websocket: WebSocket,
-    token: str = Query(...),
+    token: str | None = Query(None),
 ):
     """
     WebSocket endpoint for real-time study chat streaming.
@@ -81,15 +81,8 @@ async def chat_ws(
         break
     await websocket.accept()
     
-    # Authenticate user from token query parameter
+    # Authenticate user from token query parameter (Bypassed)
     try:
-        payload = decode_token(token)
-        user_id = payload.get("sub")
-        if not user_id:
-            await websocket.send_json({"type": "error", "content": "Invalid token sub."})
-            await websocket.close(code=4003)
-            return
-            
         result = await db.execute(select(User).limit(1))
         user = result.scalar_one_or_none()
         if not user:

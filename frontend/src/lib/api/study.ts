@@ -124,11 +124,16 @@ export const studyApi = {
     await apiClient.delete(`/study/documents/${id}`);
   },
 
-  // ── Study Chat (RAG) ─────────────────────────────────────────────────────
+  // ── Study Chat (RAG) & Notes ─────────────────────────────────────────────
 
   sendChatMessage: async (documentId: string, query: string, history: ChatMessage[]): Promise<string> => {
     const res = await apiClient.post(`/study/documents/${documentId}/chat`, { query, history });
     return res.data?.data?.answer ?? res.data?.answer ?? '';
+  },
+
+  generateNotes: async (documentId: string): Promise<string> => {
+    const res = await apiClient.post(`/study/documents/${documentId}/notes/generate`);
+    return res.data?.data?.notes || '';
   },
 
   // ── Flashcards Operations ────────────────────────────────────────────────
